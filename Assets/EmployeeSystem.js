@@ -1,5 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const cTable = require("console.table");
+// console.log(logo(config).render());
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -15,11 +17,13 @@ const connection = mysql.createConnection({
   database: "employee_systemDB",
 });
 
+//SETTING UP INITIAL CONNECTION AND DISPLAYING MENU IF SUCCESSFUL
 connection.connect((err) => {
   if (err) throw err;
   runMenu();
 });
 
+//MENU FUNCTION
 const runMenu = () => {
   inquirer
     .prompt({
@@ -33,12 +37,11 @@ const runMenu = () => {
         "Add departments",
         "Add roles",
         "Add employees",
-        "Update departments",
-        "Update roles",
         "Update employees",
         "Exit",
       ],
     })
+    //SWITCH CASE TO DIRECT USER BASED ON MENU SELECTION
     .then((answer) => {
       switch (answer.action) {
         case "View departments":
@@ -65,15 +68,7 @@ const runMenu = () => {
           addEmpl();
           break;
 
-        case "Update departments":
-          updateDept();
-          break;
-
-        case "Update roles":
-          updateRole();
-          break;
-
-        case "Update employees":
+        case "Update Employee":
           updateEmpl();
           break;
 
@@ -87,6 +82,18 @@ const runMenu = () => {
       }
     });
 };
+
+//VIEW FUNCTIONS
+
+const viewEmpl = () => {
+  connection.query("SELECT * FROM employee", (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    runMenu();
+  });
+};
+
+//ADD FUNCTIONS
 
 const addEmpl = () => {
   inquirer
@@ -128,6 +135,25 @@ const addEmpl = () => {
         }
       );
     });
+};
+
+//UPDATE FUNCTIONS
+const updateEmpl = () => {
+  const query = connection.query(
+    "UPDATE employee SET ? WHERE ?",
+    [
+      {
+        last_name: "kriz",
+      },
+      {
+        id: 1,
+      },
+    ],
+    (err, res) => {
+      if (err) throw err;
+      console.log(`${res.affectedRows} information updated!`);
+    }
+  );
 };
 
 // const multiSearch = () => {
@@ -209,7 +235,6 @@ const addEmpl = () => {
 //     });
 // };
 
-//function for menu
 //function for add department, roles, employees
 //function for viewing dept, roles, employees
 //function for updating employee roles
