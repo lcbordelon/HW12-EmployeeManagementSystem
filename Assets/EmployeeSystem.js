@@ -139,21 +139,34 @@ const addEmpl = () => {
 
 //UPDATE FUNCTIONS
 const updateEmpl = () => {
-  const query = connection.query(
-    "UPDATE employee SET ? WHERE ?",
-    [
+  const emplView = connection.query("SELECT * FROM employee", (err, res) => {
+    if (err) throw err;
+    console.table(res);
+  });
+
+  const emplChoices = emplView.map(({ id, first_name, last_name }) => ({
+    value: id,
+    name: `${first_name} ${last_name}`,
+  }));
+
+  inquirer
+    .prompt([
       {
-        last_name: "kriz",
+        type: "list",
+        name: "employeeId",
+        message: "Which employee's ID do you want to update?",
+        choices: emplChoices,
       },
-      {
-        id: 1,
-      },
-    ],
-    (err, res) => {
-      if (err) throw err;
-      console.log(`${res.affectedRows} information updated!`);
-    }
-  );
+    ])
+    .then((data) => {
+      const query = connection.query(
+        "UPDATE employee SET id = ? WHERE id = ?",
+        (err, res) => {
+          if (err) throw err;
+          console.log(`${res.affectedRows} information updated!`);
+        }
+      );
+    });
 };
 
 // const multiSearch = () => {
