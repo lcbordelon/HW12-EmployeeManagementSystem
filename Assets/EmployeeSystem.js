@@ -37,7 +37,7 @@ const runMenu = () => {
         "Add departments",
         "Add roles",
         "Add employees",
-        "Update employees",
+        "Update employee",
         "Exit",
       ],
     })
@@ -68,7 +68,7 @@ const runMenu = () => {
           addEmpl();
           break;
 
-        case "Update Employee":
+        case "Update employee":
           updateEmpl();
           break;
 
@@ -139,23 +139,42 @@ const addEmpl = () => {
 
 //UPDATE FUNCTIONS
 const updateEmpl = () => {
-  const emplView = connection.query("SELECT * FROM employee", (err, res) => {
+  const employees = connection.query("SELECT * FROM employee", (err, res) => {
     if (err) throw err;
     console.table(res);
   });
 
-  const emplChoices = emplView.map(({ id, first_name, last_name }) => ({
-    value: id,
+  const emplChoices = employees.map(({ id, first_name, last_name }) => ({
     name: `${first_name} ${last_name}`,
+    value: id,
+  }));
+
+  inquirer.prompt([
+    {
+      type: "list",
+      name: "employeeId",
+      message: "Which employee's ID do you want to update?",
+      choices: emplChoices,
+    },
+  ]);
+
+  const roles = connection.query("SELECT * FROM role", (err, res) => {
+    if (err) throw err;
+    // console.table(res);
+  });
+
+  const roleChoices = roles.map(({ id, title }) => ({
+    name: title,
+    value: id,
   }));
 
   inquirer
     .prompt([
       {
         type: "list",
-        name: "employeeId",
-        message: "Which employee's ID do you want to update?",
-        choices: emplChoices,
+        name: "roleID",
+        message: "Which role do you want to assign the selected employee?",
+        choices: roleChoices,
       },
     ])
     .then((data) => {
@@ -167,86 +186,8 @@ const updateEmpl = () => {
         }
       );
     });
+  runMenu();
 };
-
-// const multiSearch = () => {
-//   const query =
-//     "SELECT artist FROM top5000 GROUP BY artist HAVING count(*) > 1";
-//   connection.query(query, (err, res) => {
-//     if (err) throw err;
-//     res.forEach(({ artist }) => console.log(artist));
-//     runSearch();
-//   });
-// };
-
-// const rangeSearch = () => {
-//   inquirer
-//     .prompt([
-//       {
-//         name: "start",
-//         type: "input",
-//         message: "Enter starting position: ",
-//         validate(value) {
-//           if (isNaN(value) === false) {
-//             return true;
-//           }
-//           return false;
-//         },
-//       },
-//       {
-//         name: "end",
-//         type: "input",
-//         message: "Enter ending position: ",
-//         validate(value) {
-//           if (isNaN(value) === false) {
-//             return true;
-//           }
-//           return false;
-//         },
-//       },
-//     ])
-//     .then((answer) => {
-//       const query =
-//         "SELECT position,song,artist,year FROM top5000 WHERE position BETWEEN ? AND ?";
-//       connection.query(query, [answer.start, answer.end], (err, res) => {
-//         if (err) throw err;
-//         res.forEach(({ position, song, artist, year }) =>
-//           console.log(
-//             `Position: ${position} || Song: ${song} || Artist: ${artist} || Year: ${year}`
-//           )
-//         );
-//         runSearch();
-//       });
-//     });
-// };
-
-// const songSearch = () => {
-//   inquirer
-//     .prompt({
-//       name: "song",
-//       type: "input",
-//       message: "What song would you like to look for?",
-//     })
-//     .then((answer) => {
-//       console.log(`You searched for "${answer.song}"`);
-//       connection.query(
-//         "SELECT * FROM top5000 WHERE ?",
-//         { song: answer.song },
-//         (err, res) => {
-//           if (err) throw err;
-//           if (res[0]) {
-//             console.log(
-//               `Position: ${res[0].position} || Song: ${res[0].song} || Artist: ${res[0].artist} || Year: ${res[0].year}`
-//             );
-//             runSearch();
-//           } else {
-//             console.error("Song not found :(\n");
-//             runSearch();
-//           }
-//         }
-//       );
-//     });
-// };
 
 //function for add department, roles, employees
 //function for viewing dept, roles, employees
