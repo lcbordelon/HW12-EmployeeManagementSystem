@@ -163,51 +163,57 @@ async function updateEmpl() {
       //initialize another query of the employee table based on the selected employee's id
       .then((answer) => {
         //trying to select the employee's role ID to update based on the employee's ID??
-        const id = answer.id;
-        const emplSelect = id[2];
-        const roleQuery = () => {
-          connection.query("SELECT emplSelect FROM employee", (err, res) => {
+        // const id = answer.id;
+        // const emplSelect = id[2];
+        console.log(answer);
+        const roleQuery = "SELECT ? FROM employee";
+        connection.query(
+          roleQuery,
+          {
+            id: answer.employeeID,
+          },
+          (err, res) => {
             if (err) throw err;
-            console.log(emplSelect);
-          });
-        };
+            // console.log(id);
+          }
+        );
       });
   });
-
-  // const roles = connection.query("SELECT * FROM role", (err, res) => {
-  //   if (err) throw err;
-  //   // console.table(res);
-  // });
-
-  // const roleChoices = roles.map(({ id, title }) => ({
-  //   name: title,
-  //   value: id,
-  // }));
-
-  // inquirer
-  //   .prompt([
-  //     {
-  //       type: "list",
-  //       name: "roleID",
-  //       message: "Which role do you want to assign the selected employee?",
-  //       choices: roleChoices,
-  //     },
-  //   ])
-  //   .then((data) => {
-  //     const query = connection.query(
-  //       "UPDATE employee SET id = ? WHERE id = ?",
-  //       (err, res) => {
-  //         if (err) throw err;
-  //         console.log(`${res.affectedRows} information updated!`);
-  //       }
-  //     );
-  //   })
-  //   .catch((err) => {
-  //     if (err) throw err;
-  //     console.log(err);
-  //   });
-  // runMenu();
 }
+
+// const roles = connection.query("SELECT * FROM role", (err, res) => {
+//   if (err) throw err;
+//   // console.table(res);
+// });
+
+// const roleChoices = roles.map(({ id, title }) => ({
+//   name: title,
+//   value: id,
+// }));
+
+// inquirer
+//   .prompt([
+//     {
+//       type: "list",
+//       name: "roleID",
+//       message: "Which role do you want to assign the selected employee?",
+//       choices: roleChoices,
+//     },
+//   ])
+//   .then((data) => {
+//     const query = connection.query(
+//       "UPDATE employee SET id = ? WHERE id = ?",
+//       (err, res) => {
+//         if (err) throw err;
+//         console.log(`${res.affectedRows} information updated!`);
+//       }
+//     );
+//   })
+//   .catch((err) => {
+//     if (err) throw err;
+//     console.log(err);
+//   });
+// runMenu();
 
 //function for add department, roles, employees
 //function for viewing dept, roles, employees
