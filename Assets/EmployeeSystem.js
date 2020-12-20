@@ -165,20 +165,35 @@ async function updateEmpl() {
         //trying to select the employee's role ID to update based on the employee's ID??
         // const id = answer.id;
         // const emplSelect = id[2];
-        console.log(answer);
-        const roleQuery = "SELECT ? FROM employee";
-        connection.query(
-          roleQuery,
-          {
-            id: answer.employeeID,
-          },
-          (err, res) => {
+        console.log(answer); //logging as { employeeId: 2}
+        const roleQuery = () => {
+          connection.query("SELECT answer FROM employee", (err, res) => {
             if (err) throw err;
-            // console.log(id);
-          }
-        );
+            inquirer
+              .prompt([
+                {
+                  type: "input",
+                  name: "roleChange",
+                  message:
+                    "Input the new role ID you would like the employee to be assigned.",
+                },
+              ])
+              .then((answer) => {
+                const newID = answer.roleChange;
+                connection.query(
+                  "UPDATE employee SET role_id = newID WHERE id = answer",
+                  (err, res) => {
+                    console.log(
+                      `Employee id ${answer} has a new Role ID of ${newID}`
+                    );
+                  }
+                );
+              });
+          });
+        };
       });
   });
+  runMenu();
 }
 
 // const roles = connection.query("SELECT * FROM role", (err, res) => {
