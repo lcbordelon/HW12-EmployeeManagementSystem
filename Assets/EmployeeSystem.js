@@ -138,56 +138,76 @@ const addEmpl = () => {
 };
 
 //UPDATE FUNCTIONS
-const updateEmpl = () => {
-  const employees = connection.query("SELECT * FROM employee", (err, res) => {
+async function updateEmpl() {
+  //query employee table to display all employees as a list of selections to update
+  connection.query("SELECT * FROM employee", (err, res) => {
     if (err) throw err;
-    console.table(res);
+    // console.log(res);
+    //map over (iterate through) the array of employees and display them on a table.
+    const emplChoices = res.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
+      value: id,
+    }));
+    // console.log(emplChoices);
+    //Ask user to select which employee they want to update from the list of employee. User selects employee by entering the selected employee's ID
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "employeeId",
+          message: "Which employee's ID do you want to update?",
+          choices: emplChoices,
+        },
+      ])
+      //passing the user's employee ID selection as an answer to a callback function that will
+      //initialize another query of the employee table based on the selected employee's id
+      .then((answer) => {
+        //trying to select the employee's role ID to update based on the employee's ID??
+        const id = answer.id;
+        const emplSelect = id[2];
+        const roleQuery = () => {
+          connection.query("SELECT emplSelect FROM employee", (err, res) => {
+            if (err) throw err;
+            console.log(emplSelect);
+          });
+        };
+      });
   });
 
-  const emplChoices = employees.map(({ id, first_name, last_name }) => ({
-    name: `${first_name} ${last_name}`,
-    value: id,
-  }));
+  // const roles = connection.query("SELECT * FROM role", (err, res) => {
+  //   if (err) throw err;
+  //   // console.table(res);
+  // });
 
-  inquirer.prompt([
-    {
-      type: "list",
-      name: "employeeId",
-      message: "Which employee's ID do you want to update?",
-      choices: emplChoices,
-    },
-  ]);
+  // const roleChoices = roles.map(({ id, title }) => ({
+  //   name: title,
+  //   value: id,
+  // }));
 
-  const roles = connection.query("SELECT * FROM role", (err, res) => {
-    if (err) throw err;
-    // console.table(res);
-  });
-
-  const roleChoices = roles.map(({ id, title }) => ({
-    name: title,
-    value: id,
-  }));
-
-  inquirer
-    .prompt([
-      {
-        type: "list",
-        name: "roleID",
-        message: "Which role do you want to assign the selected employee?",
-        choices: roleChoices,
-      },
-    ])
-    .then((data) => {
-      const query = connection.query(
-        "UPDATE employee SET id = ? WHERE id = ?",
-        (err, res) => {
-          if (err) throw err;
-          console.log(`${res.affectedRows} information updated!`);
-        }
-      );
-    });
-  runMenu();
-};
+  // inquirer
+  //   .prompt([
+  //     {
+  //       type: "list",
+  //       name: "roleID",
+  //       message: "Which role do you want to assign the selected employee?",
+  //       choices: roleChoices,
+  //     },
+  //   ])
+  //   .then((data) => {
+  //     const query = connection.query(
+  //       "UPDATE employee SET id = ? WHERE id = ?",
+  //       (err, res) => {
+  //         if (err) throw err;
+  //         console.log(`${res.affectedRows} information updated!`);
+  //       }
+  //     );
+  //   })
+  //   .catch((err) => {
+  //     if (err) throw err;
+  //     console.log(err);
+  //   });
+  // runMenu();
+}
 
 //function for add department, roles, employees
 //function for viewing dept, roles, employees
