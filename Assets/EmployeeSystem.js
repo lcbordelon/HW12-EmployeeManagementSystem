@@ -84,9 +84,27 @@ const runMenu = () => {
 };
 
 //VIEW FUNCTIONS
+const viewDept = () => {
+  connection.query("SELECT * FROM department", (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    runMenu();
+  });
+};
+
+const viewRole = () => {
+  connection.query("SELECT * FROM role", (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    runMenu();
+  });
+};
 
 const viewEmpl = () => {
-  connection.query("SELECT * FROM employee", (err, res) => {
+  //SELECT LEFT JOIN
+  const query =
+    "SELECT employee.id, employee.first_name, employee.last_name, role.title, department.department AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN department on role.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id";
+  connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     runMenu();
@@ -94,6 +112,66 @@ const viewEmpl = () => {
 };
 
 //ADD FUNCTIONS
+
+const addDept = () => {
+  inquirer
+    .prompt([
+      {
+        name: "deptName",
+        type: "input",
+        message: "What is the name of the department?",
+      },
+    ])
+    .then((answer) => {
+      const query = "INSERT INTO department SET ?";
+      connection.query(
+        query,
+        {
+          department: answer.deptName,
+        },
+        (err, res) => {
+          if (err) throw err;
+          runMenu();
+        }
+      );
+    });
+};
+
+const addRole = () => {
+  inquirer
+    .prompt([
+      {
+        name: "titleName",
+        type: "input",
+        message: "What is the title of the role?",
+      },
+      {
+        name: "salary",
+        type: "input",
+        message: "What is the role's salary?",
+      },
+      {
+        name: "departmentID",
+        type: "input",
+        message: "What is ID number of the department?",
+      },
+    ])
+    .then((answer) => {
+      const query = "INSERT INTO role SET ?";
+      connection.query(
+        query,
+        {
+          title: answer.titleName,
+          salary: answer.salary,
+          department_id: answer.departmentID,
+        },
+        (err, res) => {
+          if (err) throw err;
+          runMenu();
+        }
+      );
+    });
+};
 
 const addEmpl = () => {
   inquirer
@@ -138,99 +216,26 @@ const addEmpl = () => {
 };
 
 //UPDATE FUNCTIONS
-async function updateEmpl() {
-  //query employee table to display all employees as a list of selections to update
-  connection.query("SELECT * FROM employee", (err, res) => {
-    if (err) throw err;
-    // console.log(res);
-    //map over (iterate through) the array of employees and display them on a table.
-    const emplChoices = res.map(({ id, first_name, last_name }) => ({
-      name: `${first_name} ${last_name}`,
-      value: id,
-    }));
-    // console.log(emplChoices);
-    //Ask user to select which employee they want to update from the list of employee. User selects employee by entering the selected employee's ID
-    inquirer
-      .prompt([
-        {
-          type: "list",
-          name: "employeeId",
-          message: "Which employee's ID do you want to update?",
-          choices: emplChoices,
-        },
-      ])
-      //passing the user's employee ID selection as an answer to a callback function that will
-      //initialize another query of the employee table based on the selected employee's id
-      .then((answer) => {
-        //trying to select the employee's role ID to update based on the employee's ID??
-        // const id = answer.id;
-        // const emplSelect = id[2];
-        console.log(answer); //logging as { employeeId: 2}
-        const roleQuery = () => {
-          connection.query("SELECT answer FROM employee", (err, res) => {
-            if (err) throw err;
-            inquirer
-              .prompt([
-                {
-                  type: "input",
-                  name: "roleChange",
-                  message:
-                    "Input the new role ID you would like the employee to be assigned.",
-                },
-              ])
-              .then((answer) => {
-                const newID = answer.roleChange;
-                connection.query(
-                  "UPDATE employee SET role_id = newID WHERE id = answer",
-                  (err, res) => {
-                    console.log(
-                      `Employee id ${answer} has a new Role ID of ${newID}`
-                    );
-                  }
-                );
-              });
-          });
-        };
-      });
-  });
-  runMenu();
-}
-
-// const roles = connection.query("SELECT * FROM role", (err, res) => {
-//   if (err) throw err;
-//   // console.table(res);
-// });
-
-// const roleChoices = roles.map(({ id, title }) => ({
-//   name: title,
-//   value: id,
-// }));
-
-// inquirer
-//   .prompt([
-//     {
-//       type: "list",
-//       name: "roleID",
-//       message: "Which role do you want to assign the selected employee?",
-//       choices: roleChoices,
-//     },
-//   ])
-//   .then((data) => {
-//     const query = connection.query(
-//       "UPDATE employee SET id = ? WHERE id = ?",
-//       (err, res) => {
-//         if (err) throw err;
-//         console.log(`${res.affectedRows} information updated!`);
-//       }
-//     );
-//   })
-//   .catch((err) => {
-//     if (err) throw err;
-//     console.log(err);
-//   });
-// runMenu();
-
-//function for add department, roles, employees
-//function for viewing dept, roles, employees
-//function for updating employee roles
-//3 tables (department, role, employee)
+// Update employee role
+const updateEmpl = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message:
+          "Please enter the employee ID of the employee you would like to change the role of",
+        name: "empUpd",
+      },
+      {
+        type: "input",
+        message: "Please enter the role ID you would it updated to",
+        name: "roleUpdateID",
+      },
+    ])
+    .then((answer) => {
+      connection.query(
+        `UPDATE employee SET role_id = ${answer.roleUpdateID} WHERE id = ${answer.empUpd}`
+      );
+      runMenu();
+    });
+};
